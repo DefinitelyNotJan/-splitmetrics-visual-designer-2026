@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Jan Lönnqvist · Senior Visual Designer · SplitMetrics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #ffffff;
+    --navy: #04003B;
+    --red: #dd3737;
+    --text: #04003B;
+    --text-dim: rgba(4,0,59,0.55);
+    --text-muted: rgba(4,0,59,0.25);
+    --border: rgba(4,0,59,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter Tight', -apple-system, sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+#scroll-spacer { height: 1200vh; }
+#webgl { position: fixed; inset: 0; z-index: 1; }
+
+.cursor {
+    position: fixed; width: 24px; height: 24px;
+    border: 1.5px solid var(--navy);
+    border-radius: 50%; pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s, background 0.3s, border-color 0.3s;
+}
+.cursor.hover { width: 64px; height: 64px; background: rgba(4,0,59,0.04); border-color: var(--red); }
+.cursor-dot {
+    position: fixed; width: 5px; height: 5px; background: var(--navy);
+    border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+}
+
+#loader {
+    position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+    transition: opacity 0.8s ease, visibility 0.8s;
+}
+#loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-text {
+    font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 900;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--navy);
+    animation: loaderPulse 1.5s ease-in-out infinite;
+}
+.loader-bar { width: 120px; height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
+.loader-bar-fill { height: 100%; width: 0%; background: var(--red); animation: loaderFill 1.8s ease-in-out forwards; }
+@keyframes loaderPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes loaderFill { to { width: 100%; } }
+
+nav {
+    position: fixed; top: 0; left: 0; right: 0; padding: 28px 48px;
+    display: flex; justify-content: space-between; align-items: center; z-index: 100;
+}
+.nav-logo { display: flex; align-items: center; gap: 14px; }
+.nav-logo-text { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 0.06em; color: var(--navy); }
+.nav-logo span { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.nav-links { display: flex; gap: 36px; }
+.nav-links a {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-muted); text-decoration: none; transition: color 0.3s; cursor: none;
+}
+.nav-links a:hover { color: var(--red); }
+
+.zone {
+    position: fixed; z-index: 50; pointer-events: none; opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.zone.active { opacity: 1; pointer-events: auto; }
+
+.zone-hero { bottom: 14vh; left: 6vw; max-width: 600px; transform: translateY(40px); }
+.zone-hero.active { transform: translateY(0); }
+.hero-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 20px; display: flex; align-items: center; gap: 14px;
+}
+.hero-label::before { content: ''; width: 36px; height: 1.5px; background: var(--red); }
+.hero-name {
+    font-family: 'Montserrat', sans-serif; font-size: clamp(56px, 10vw, 110px);
+    font-weight: 900; line-height: 0.88; letter-spacing: -0.04em; margin-bottom: 24px;
+}
+.hero-name .outline { -webkit-text-stroke: 1.5px var(--text); -webkit-text-fill-color: transparent; }
+.hero-role { font-size: 15px; font-weight: 400; color: var(--text-dim); line-height: 1.7; max-width: 440px; }
+.hero-role strong { color: var(--text); font-weight: 500; }
+
+.zone-side { top: 50%; max-width: 440px; transform: translateY(-50%); }
+.zone-side.left { left: 6vw; transform: translateY(-50%) translateX(-60px); }
+.zone-side.left.active { transform: translateY(-50%) translateX(0); }
+.zone-side.right { right: 6vw; text-align: right; transform: translateY(-50%) translateX(60px); }
+.zone-side.right.active { transform: translateY(-50%) translateX(0); }
+
+.zone-label {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+}
+.zone-side.right .zone-label { justify-content: flex-end; }
+.zone-label::before { content: ''; width: 24px; height: 1px; }
+.zone-label.red { color: var(--red); }
+.zone-label.red::before { background: var(--red); }
+.zone-label.navy { color: var(--navy); }
+.zone-label.navy::before { background: var(--navy); }
+.zone-label.dim { color: var(--text-dim); }
+.zone-label.dim::before { background: var(--text-dim); }
+
+.zone-title {
+    font-family: 'Montserrat', sans-serif; font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 16px;
+}
+.zone-text { font-size: 14px; font-weight: 400; color: var(--text-dim); line-height: 1.8; }
+.zone-text .hl { color: var(--text); font-weight: 500; }
+.zone-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.zone-side.right .zone-tags { justify-content: flex-end; }
+.tag {
+    padding: 8px 16px; font-size: 11px; font-weight: 500; letter-spacing: 0.02em;
+    border-radius: 100px; border: 1px solid var(--border); color: var(--text-dim); transition: all 0.3s;
+}
+.tag:hover { border-color: var(--red); color: var(--red); }
+.tag.red { border-color: rgba(221,55,55,0.25); color: var(--red); }
+.tag.navy { border-color: rgba(4,0,59,0.2); color: var(--navy); }
+.zone-period { font-size: 11px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.04em; margin-bottom: 6px; }
+
+.zone-cta { top: 50%; left: 50%; transform: translate(-50%, -50%) translateY(40px); text-align: center; max-width: 560px; }
+.zone-cta.active { transform: translate(-50%, -50%) translateY(0); }
+.cta-title {
+    font-family: 'Montserrat', sans-serif; font-size: clamp(40px, 6vw, 72px);
+    font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-bottom: 16px;
+}
+.cta-title .red { color: var(--red); }
+.cta-text { font-size: 15px; color: var(--text-dim); line-height: 1.7; margin-bottom: 36px; }
+.cta-buttons { display: flex; gap: 14px; justify-content: center; }
+.btn {
+    padding: 15px 32px; font-size: 11px; font-weight: 600; font-family: inherit;
+    letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none;
+    border-radius: 6px; transition: all 0.3s; cursor: none;
+}
+.btn-primary { background: var(--navy); color: white; border: none; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(4,0,59,0.15); }
+.btn-secondary { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--red); color: var(--red); }
+
+.progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--red); z-index: 101; width: 0%; transition: width 0.1s; }
+.zone-marker { position: fixed; right: 48px; bottom: 48px; font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); z-index: 100; }
+.zone-marker .num { color: var(--red); margin-right: 10px; font-weight: 600; }
+
+.scroll-hint {
+    position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-muted); z-index: 100; opacity: 1; transition: opacity 0.5s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.scroll-hint.hidden { opacity: 0; }
+.scroll-line { width: 1px; height: 32px; background: linear-gradient(to bottom, var(--red), transparent); animation: scrollPulse 2s infinite; }
+@keyframes scrollPulse { 0%, 100% { opacity: 0.3; transform: scaleY(0.6); } 50% { opacity: 1; transform: scaleY(1); } }
+
+.glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(140px); }
+.glow-1 { width: 500px; height: 500px; background: rgba(221,55,55,0.05); top: -10%; right: -5%; }
+.glow-2 { width: 400px; height: 400px; background: rgba(4,0,59,0.03); bottom: -10%; left: -5%; }
+
+@media (max-width: 768px) {
+    body { cursor: auto; }
+    .cursor, .cursor-dot { display: none; }
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .zone-hero { left: 5vw; right: 5vw; bottom: 10vh; }
+    .zone-side { max-width: 85vw; }
+    .zone-side.left { left: 5vw; }
+    .zone-side.right { right: 5vw; }
+    .zone-marker { right: 24px; bottom: 24px; }
+    .cta-buttons { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="loader-text">SplitMetrics</div>
+    <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+<canvas id="webgl"></canvas>
+<div class="progress-bar" id="progressBar"></div>
+
+<nav>
+    <div class="nav-logo">
+        <div class="nav-logo-text">SplitMetrics</div>
+        <span>· Remote, Europe</span>
+    </div>
+    <div class="nav-links">
+        <a href="#" onclick="scrollToZone(0);return false;">Start</a>
+        <a href="#" onclick="scrollToZone(5);return false;">Experience</a>
+        <a href="#" onclick="scrollToZone(9);return false;">Contact</a>
+    </div>
+</nav>
+
+<!-- Zone 0: Hero -->
+<div class="zone zone-hero active" data-zone="0">
+    <div class="hero-label">Senior Visual Designer</div>
+    <h1 class="hero-name">JAN<br><span class="outline">LÖNNQVIST</span></h1>
+    <p class="hero-role">10+ years building <strong>brand systems, visual identities, and campaign design</strong> for global brands. Strategic design that drives emotional connection and conversion — from concept to scalable system.</p>
+</div>
+
+<!-- Zone 1: Brand & Visual Strategy -->
+<div class="zone zone-side left" data-zone="1">
+    <div class="zone-label red">Visual Strategy</div>
+    <h2 class="zone-title">Brand to<br>Conversion</h2>
+    <p class="zone-text">A decade of turning <span class="hl">brand narratives into visual systems that convert</span>. Web, ads, email, events, social — designing across every channel with obsessive attention to consistency. Data-informed iteration on creative to <span class="hl">optimize CTRs and drive outcomes</span>.</p>
+    <div class="zone-tags">
+        <span class="tag red">Visual Systems</span>
+        <span class="tag red">Brand Identity</span>
+        <span class="tag">Web Design</span>
+        <span class="tag">Conversion</span>
+    </div>
+</div>
+
+<!-- Zone 2: GLS Group -->
+<div class="zone zone-side right" data-zone="2">
+    <div class="zone-label dim">Current Role</div>
+    <div class="zone-period">2024 — Present</div>
+    <h2 class="zone-title">GLS Group</h2>
+    <p class="zone-text">Group Graphic Designer at <span class="hl">EMEA-wide scale across 40+ countries</span>. Campaign key visuals, social content, web assets, event design, and presentations. Building <span class="hl">scalable design systems and self-serve templates</span> for regional marketing teams.</p>
+    <div class="zone-tags">
+        <span class="tag navy">40+ Countries</span>
+        <span class="tag navy">Design Systems</span>
+        <span class="tag">Templates</span>
+        <span class="tag">Events</span>
+    </div>
+</div>
+
+<!-- Zone 3: DHL -->
+<div class="zone zone-side left" data-zone="3">
+    <div class="zone-label red">Freelance</div>
+    <div class="zone-period">Feb 2024 — Aug 2024</div>
+    <h2 class="zone-title">DHL Supply<br>Chain</h2>
+    <p class="zone-text">Senior Graphic Designer. <span class="hl">Campaign key visuals and production</span> across multiple markets. Web pages, social/ads, email campaigns, event signage. End-to-end creative execution — <span class="hl">from concept to final delivery</span> across print and digital.</p>
+    <div class="zone-tags">
+        <span class="tag red">Campaigns</span>
+        <span class="tag red">Multi-Market</span>
+        <span class="tag">Web</span>
+        <span class="tag">Email</span>
+    </div>
+</div>
+
+<!-- Zone 4: Rituals -->
+<div class="zone zone-side right" data-zone="4">
+    <div class="zone-label dim">Full-time</div>
+    <div class="zone-period">Sep 2022 — Feb 2024</div>
+    <h2 class="zone-title">Rituals</h2>
+    <p class="zone-text">Visual Specialist. <span class="hl">In-store campaign design and point-of-sale visuals</span> across global retail. Premium visual storytelling with obsessive attention to <span class="hl">lighting, composition, color, and material</span> — emotional design that builds brand connection.</p>
+    <div class="zone-tags">
+        <span class="tag navy">Visual Storytelling</span>
+        <span class="tag navy">Campaigns</span>
+        <span class="tag">DTP</span>
+        <span class="tag">In-Store</span>
+    </div>
+</div>
+
+<!-- Zone 5: HelloFresh -->
+<div class="zone zone-side left" data-zone="5">
+    <div class="zone-label red">Contract</div>
+    <div class="zone-period">Apr 2022 — Sep 2022</div>
+    <h2 class="zone-title">HelloFresh</h2>
+    <p class="zone-text">Creative / DTP. <span class="hl">Led a team</span> managing design and print production across <span class="hl">Benelux and France</span>. High-volume, deadline-driven production with cross-functional collaboration across marketing, product, and development teams.</p>
+    <div class="zone-tags">
+        <span class="tag red">Team Lead</span>
+        <span class="tag red">Cross-Functional</span>
+        <span class="tag">Benelux & France</span>
+    </div>
+</div>
+
+<!-- Zone 6: Valve & IKEA -->
+<div class="zone zone-side right" data-zone="6">
+    <div class="zone-label dim">Foundation</div>
+    <div class="zone-period">2013 — 2020</div>
+    <h2 class="zone-title">Agency &<br>In-House</h2>
+    <p class="zone-text"><span class="hl">Art Director at Valve Helsinki</span>: concept development, visual storytelling, and creative direction. <span class="hl">Graphic Artist at IKEA Group</span>: brand guidelines, campaigns, and in-store visuals. Plus six years across Helsinki agencies building deep expertise in <span class="hl">production, compositing, and visual craft</span>.</p>
+    <div class="zone-tags">
+        <span class="tag navy">Art Direction</span>
+        <span class="tag navy">IKEA</span>
+        <span class="tag">Valve</span>
+        <span class="tag">Agency</span>
+    </div>
+</div>
+
+<!-- Zone 7: Capabilities -->
+<div class="zone zone-side left" data-zone="7">
+    <div class="zone-label red">Toolkit</div>
+    <h2 class="zone-title">Design<br>Stack</h2>
+    <p class="zone-text"><span class="hl">Figma</span>: design systems, components, prototyping. <span class="hl">Adobe Creative Suite</span>: Photoshop compositing, Illustrator, InDesign. <span class="hl">Motion</span>: After Effects, Premiere Pro. <span class="hl">AI tools</span>: prompt engineering, upscaling, paintover workflows. UX principles, A/B testing awareness, data-informed creative iteration.</p>
+    <div class="zone-tags">
+        <span class="tag red">Figma</span>
+        <span class="tag navy">Adobe CC</span>
+        <span class="tag red">After Effects</span>
+        <span class="tag navy">AI Tools</span>
+        <span class="tag">Data-Informed</span>
+    </div>
+</div>
+
+<!-- Zone 8: Why SplitMetrics -->
+<div class="zone zone-side right" data-zone="8">
+    <div class="zone-label red">Why SplitMetrics</div>
+    <h2 class="zone-title">Strategic<br>Vision</h2>
+    <p class="zone-text">SplitMetrics is building the leading AI platform for app marketing — and that story needs a visual language as sharp as the product. A decade of <span class="hl">brand systems, multi-channel campaigns, and stakeholder collaboration</span> across global markets is exactly the strategic design this role demands.<br><br>From website redesigns to scalable template systems, I bring the <span class="hl">visual craft, brand thinking, and self-sufficient execution</span> to own creative strategy end to end. Based in Europe, remote-ready.</p>
+</div>
+
+<!-- Zone 9: CTA -->
+<div class="zone zone-cta" data-zone="9">
+    <h2 class="cta-title">Let's<br><span class="red">Connect</span></h2>
+    <p class="cta-text">Ready to own creative strategy, build emotional brand connection, and drive conversion through design at SplitMetrics.</p>
+    <div class="cta-buttons">
+        <a href="https://definitelynotjan.github.io/Portfolio/" target="_blank" class="btn btn-primary">View Portfolio</a>
+        <a href="mailto:jan.lonnqvist@windowslive.com" class="btn btn-secondary">Get in Touch</a>
+    </div>
+</div>
+
+<div class="zone-marker"><span class="num">01</span><span id="zoneLabel">START</span></div>
+<div class="scroll-hint" id="scrollHint">Scroll<div class="scroll-line"></div></div>
+
+<div id="scroll-spacer"></div>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const isMobile = /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+// ── CURSOR ──
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
+let cursorX = mouseX, cursorY = mouseY;
+
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+document.querySelectorAll('a, .btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// ── LOADER ──
+setTimeout(() => document.getElementById('loader').classList.add('done'), 2200);
+
+// ── THREE.JS ──
+const canvas = document.getElementById('webgl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setClearColor(0xffffff);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.4;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0xffffff, 0.008);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 20);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.25, 0.4, 0.9));
+
+// ── ENVIRONMENT MAP ──
+const pmremGen = new THREE.PMREMGenerator(renderer);
+const envScene = new THREE.Scene();
+envScene.add(new THREE.Mesh(
+    new THREE.IcosahedronGeometry(100, 4),
+    new THREE.ShaderMaterial({
+        side: THREE.BackSide, uniforms: {},
+        vertexShader: `varying vec3 vP; void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+        fragmentShader: `varying vec3 vP; void main(){
+            vec3 d=normalize(vP); float t=d.y*.5+.5;
+            vec3 c=mix(vec3(.88,.88,.92),vec3(.96,.96,.99),t);
+            c+=vec3(.9,.15,.15)*smoothstep(.85,1.,dot(d,normalize(vec3(1.,.8,-.5))))*.2;
+            c+=vec3(.02,0.,.25)*smoothstep(.88,1.,dot(d,normalize(vec3(-.8,.3,.7))))*.2;
+            gl_FragColor=vec4(c,1.);}`
+    })
+));
+const envMap = pmremGen.fromScene(envScene, 0.04).texture;
+scene.environment = envMap;
+
+// ── SPLITMETRICS LOGOMARK (4 geometric shapes from SVG) ──
+const svgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 73 93">
+<path d="M72.3154 21.4387C72.3154 25.6788 71.0662 29.8238 68.7258 33.3494C66.3854 36.8749 63.0589 39.6228 59.1669 41.2454C55.275 42.8681 50.9924 43.2926 46.8607 42.4654C42.729 41.6382 38.9338 39.5964 35.955 36.5981C32.9762 33.5999 30.9477 29.7798 30.1258 25.6211C29.304 21.4625 29.7258 17.1519 31.3379 13.2344C32.95 9.31704 35.68 5.96877 39.1827 3.61306C42.6853 1.25735 46.8034 0 51.016 0C53.8131 0 56.5828 0.554525 59.1669 1.63192C61.7511 2.70931 64.0991 4.28847 66.077 6.27924C68.0548 8.27 69.6237 10.6334 70.6941 13.2344C71.7645 15.8355 72.3154 18.6233 72.3154 21.4387Z"/>
+<path d="M22.2341 41.3607C22.2333 41.5621 22.1912 41.7612 22.1105 41.9456C22.0298 42.1299 21.9122 42.2956 21.7651 42.4321C21.618 42.5687 21.4444 42.6732 21.2553 42.7393C21.0663 42.8053 20.8657 42.8314 20.6661 42.8159C15.3481 42.3627 10.393 39.9165 6.78133 35.9614C3.16971 32.0064 1.16486 26.8307 1.16357 21.4588C1.16229 16.0869 3.16468 10.9102 6.77442 6.9534C10.3842 2.99659 15.3382 0.547994 20.656 0.0922424C20.8558 0.0751787 21.057 0.100168 21.2468 0.165619C21.4366 0.231071 21.6107 0.335551 21.7582 0.47242C21.9057 0.609288 22.0232 0.775549 22.1034 0.960626C22.1836 1.1457 22.2246 1.34554 22.2239 1.54745L22.2341 41.3607Z"/>
+<path d="M0.944092 71.5716C0.944092 75.8118 2.19327 79.9567 4.53368 83.4823C6.87409 87.0079 10.2006 89.7557 14.0926 91.3784C17.9845 93.001 22.2671 93.4256 26.3988 92.5983C30.5305 91.7711 34.3257 89.7293 37.3045 86.731C40.2832 83.7328 42.3118 79.9128 43.1337 75.7541C43.9555 71.5954 43.5337 67.2848 41.9216 63.3674C40.3095 59.45 37.5795 56.1017 34.0768 53.746C30.5741 51.3903 26.4561 50.1329 22.2435 50.1329C16.5945 50.1329 11.177 52.3916 7.18254 56.4122C3.18812 60.4327 0.944092 65.8857 0.944092 71.5716Z"/>
+<path d="M51.0161 91.4936C51.0169 91.6951 51.059 91.8942 51.1397 92.0785C51.2204 92.2629 51.3379 92.4285 51.4851 92.5651C51.6322 92.7016 51.8057 92.8062 51.9948 92.8722C52.1839 92.9382 52.3845 92.9643 52.584 92.9488C57.9385 92.5397 62.9419 90.11 66.5925 86.1461C70.2431 82.1822 72.2714 76.9766 72.2714 71.5716C72.2714 66.1666 70.2431 60.961 66.5925 56.9971C62.9419 53.0332 57.9385 50.6035 52.584 50.1944C52.385 50.1774 52.1847 50.2021 51.9956 50.267C51.8065 50.3318 51.6329 50.4354 51.4856 50.5711C51.3382 50.7069 51.2205 50.8719 51.1397 51.0558C51.0589 51.2396 51.0168 51.4383 51.0161 51.6394V91.4936Z"/>
+</svg>`;
+
+const svgLoader = new SVGLoader();
+const svgData = svgLoader.parse(svgMarkup);
+
+const logoMat = new THREE.MeshPhysicalMaterial({
+    color: 0x04003B,
+    metalness: 0.88,
+    roughness: 0.06,
+    envMap,
+    envMapIntensity: 2.5,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.03,
+    iridescence: 0.7,
+    iridescenceIOR: 1.5,
+    iridescenceThicknessRange: [100, 400],
+    sheen: 0.3,
+    sheenColor: new THREE.Color(0xdd3737),
+});
+
+const logoGroup = new THREE.Group();
+const extrudeSettings = {
+    depth: 14,
+    bevelEnabled: true,
+    bevelThickness: 2.5,
+    bevelSize: 1.5,
+    bevelSegments: 8,
+    curveSegments: 24
+};
+
+svgData.paths.forEach(path => {
+    const shapes = SVGLoader.createShapes(path);
+    shapes.forEach(shape => {
+        const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        logoGroup.add(new THREE.Mesh(geo, logoMat));
+    });
+});
+
+const box = new THREE.Box3().setFromObject(logoGroup);
+const center = box.getCenter(new THREE.Vector3());
+const maxDim = Math.max(...box.getSize(new THREE.Vector3()).toArray());
+const logoScale = 8 / maxDim;
+logoGroup.position.sub(center);
+
+const logoWrapper = new THREE.Group();
+logoWrapper.add(logoGroup);
+logoWrapper.scale.setScalar(logoScale);
+logoWrapper.scale.y *= -1;
+scene.add(logoWrapper);
+
+// ── GHOST TRAILS ──
+const ghostLogos = [];
+const ghostCount = 6;
+for (let i = 0; i < ghostCount; i++) {
+    const ghostGroup = new THREE.Group();
+    svgData.paths.forEach(path => {
+        const shapes = SVGLoader.createShapes(path);
+        shapes.forEach(shape => {
+            const geo = new THREE.ExtrudeGeometry(shape, { ...extrudeSettings, bevelSegments: 3 });
+            const ghostMat = new THREE.MeshPhysicalMaterial({
+                color: 0x04003B, metalness: 0.8, roughness: 0.15,
+                envMap, envMapIntensity: 1.5,
+                transparent: true, opacity: 0.08 - i * 0.01,
+                clearcoat: 0.5,
+            });
+            ghostGroup.add(new THREE.Mesh(geo, ghostMat));
+        });
+    });
+    ghostGroup.position.sub(center.clone());
+    const gw = new THREE.Group();
+    gw.add(ghostGroup);
+    gw.scale.setScalar(logoScale);
+    gw.scale.y *= -1;
+    scene.add(gw);
+    ghostLogos.push(gw);
+}
+
+// ── ORBITING ELEMENTS ──
+function createSphere(color, sz) {
+    const mat = new THREE.MeshPhysicalMaterial({
+        color, metalness: 0.4, roughness: 0.15, envMap, envMapIntensity: 1.5,
+        clearcoat: 1.0, clearcoatRoughness: 0.05,
+    });
+    return new THREE.Mesh(new THREE.SphereGeometry(sz, 24, 24), mat);
+}
+
+function createDiamond(color, sz) {
+    const mat = new THREE.MeshPhysicalMaterial({
+        color, metalness: 0.6, roughness: 0.1, envMap, envMapIntensity: 2.0,
+        transparent: true, opacity: 0.85,
+    });
+    return new THREE.Mesh(new THREE.OctahedronGeometry(sz, 0), mat);
+}
+
+function createDisc(color, sz) {
+    const mat = new THREE.MeshPhysicalMaterial({
+        color, metalness: 0.3, roughness: 0.25, envMap, envMapIntensity: 1.0,
+    });
+    return new THREE.Mesh(new THREE.CylinderGeometry(sz, sz, sz * 0.15, 24), mat);
+}
+
+function createTorus(color, sz) {
+    const mat = new THREE.MeshPhysicalMaterial({
+        color, metalness: 0.5, roughness: 0.15, envMap, envMapIntensity: 1.5,
+    });
+    return new THREE.Mesh(new THREE.TorusGeometry(sz, sz * 0.3, 12, 24), mat);
+}
+
+const orbitItems = [];
+const creators = [
+    () => createSphere(0xdd3737, 0.28),
+    () => createDiamond(0x04003B, 0.25),
+    () => createDisc(0xdd3737, 0.26),
+    () => createSphere(0x04003B, 0.2),
+    () => createTorus(0xdd3737, 0.18),
+    () => createDiamond(0x04003B, 0.2),
+    () => createSphere(0xdd3737, 0.16),
+    () => createDisc(0x04003B, 0.22),
+];
+
+for (let i = 0; i < 8; i++) {
+    const item = creators[i]();
+    scene.add(item);
+    orbitItems.push({
+        mesh: item,
+        radius: 4.5 + Math.random() * 3.5,
+        speed: 0.12 + Math.random() * 0.3,
+        offset: (i / 8) * Math.PI * 2,
+        yOffset: (Math.random() - 0.5) * 3,
+        tilt: Math.random() * 0.5,
+        spinSpeed: 0.5 + Math.random() * 2,
+    });
+}
+
+// ── ORBITING RINGS ──
+const ringGroup = new THREE.Group();
+const ring1 = new THREE.Mesh(new THREE.TorusGeometry(5.5, 0.015, 16, 120),
+    new THREE.MeshStandardMaterial({ color: 0x04003B, transparent: true, opacity: 0.1 }));
+ring1.rotation.x = Math.PI * 0.5;
+ringGroup.add(ring1);
+const ring2 = new THREE.Mesh(new THREE.TorusGeometry(7, 0.01, 16, 120),
+    new THREE.MeshStandardMaterial({ color: 0xdd3737, transparent: true, opacity: 0.08 }));
+ring2.rotation.x = Math.PI * 0.35; ring2.rotation.z = Math.PI * 0.2;
+ringGroup.add(ring2);
+scene.add(ringGroup);
+
+// ── FLOATING PARTICLES ──
+const particleCount = 150;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(particleCount * 3);
+const pBasePos = [];
+for (let i = 0; i < particleCount; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = 8 + Math.random() * 20;
+    pPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+    pPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    pPos[i*3+2] = r * Math.cos(phi);
+    pBasePos.push({ x: pPos[i*3], y: pPos[i*3+1], z: pPos[i*3+2] });
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const pCanvas = document.createElement('canvas'); pCanvas.width = 32; pCanvas.height = 32;
+const pCtx = pCanvas.getContext('2d');
+const pGrad = pCtx.createRadialGradient(16,16,0,16,16,16);
+pGrad.addColorStop(0, 'rgba(4,0,59,0.5)');
+pGrad.addColorStop(0.4, 'rgba(4,0,59,0.15)');
+pGrad.addColorStop(1, 'rgba(4,0,59,0)');
+pCtx.fillStyle = pGrad; pCtx.fillRect(0,0,32,32);
+scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({
+    size: 0.08, map: new THREE.CanvasTexture(pCanvas), color: 0x04003B,
+    transparent: true, opacity: 0.35, depthWrite: false, sizeAttenuation: true
+})));
+
+// ── LIGHTING ──
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+keyLight.position.set(8, 12, 10); scene.add(keyLight);
+const fillLight = new THREE.PointLight(0xffffff, 1.5, 40);
+fillLight.position.set(-8, 5, 8); scene.add(fillLight);
+const backLight = new THREE.PointLight(0xffffff, 1.0, 40);
+backLight.position.set(8, -5, -6); scene.add(backLight);
+const redAccent = new THREE.PointLight(0xdd3737, 0.25, 30);
+redAccent.position.set(-4, -6, 5); scene.add(redAccent);
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+rimLight.position.set(-5, -3, -10); scene.add(rimLight);
+
+// ── SCROLL ──
+let scroll = 0, targetScroll = 0;
+const scrollHeight = document.getElementById('scroll-spacer').offsetHeight - innerHeight;
+const zones = document.querySelectorAll('.zone');
+const zoneLabel = document.getElementById('zoneLabel');
+const scrollHint = document.getElementById('scrollHint');
+const progressBar = document.getElementById('progressBar');
+const zoneNames = ['START', 'STRATEGY', 'GLS GROUP', 'DHL', 'RITUALS', 'HELLOFRESH', 'FOUNDATION', 'TOOLKIT', 'WHY SPLITMETRICS', 'CONNECT'];
+const zoneThresholds = [0, 0.08, 0.17, 0.27, 0.37, 0.47, 0.57, 0.67, 0.78, 0.90];
+let currentZone = 0;
+
+window.addEventListener('scroll', () => { targetScroll = scrollY / scrollHeight; }, { passive: true });
+window.scrollToZone = function(i) { window.scrollTo({ top: zoneThresholds[i] * scrollHeight, behavior: 'smooth' }); };
+
+// ── ANIMATION ──
+const clock = new THREE.Clock();
+
+function animate() {
+    requestAnimationFrame(animate);
+    const time = clock.getElapsedTime();
+    scroll += (targetScroll - scroll) * 0.06;
+
+    if (!isMobile) {
+        cursorX += (mouseX - cursorX) * 0.1; cursorY += (mouseY - cursorY) * 0.1;
+        cursor.style.left = cursorX + 'px'; cursor.style.top = cursorY + 'px';
+        cursorDot.style.left = mouseX + 'px'; cursorDot.style.top = mouseY + 'px';
+    }
+
+    progressBar.style.width = (scroll * 100) + '%';
+
+    let newZone = 0;
+    for (let i = zoneThresholds.length - 1; i >= 0; i--) { if (scroll >= zoneThresholds[i] - 0.03) { newZone = i; break; } }
+    if (newZone !== currentZone) { currentZone = newZone; zoneLabel.textContent = zoneNames[currentZone]; }
+    zones.forEach((z, i) => z.classList.toggle('active', i === currentZone));
+    scrollHint.classList.toggle('hidden', scroll > 0.03);
+    document.querySelector('.zone-marker .num').textContent = String(currentZone + 1).padStart(2, '0');
+
+    // ── LOGO MOTION ──
+    const scrollRot = scroll * Math.PI * 4;
+    logoWrapper.rotation.y = time * 0.2 + scrollRot;
+    logoWrapper.rotation.x = Math.sin(time * 0.15) * 0.3 + scroll * 1.2;
+    logoWrapper.rotation.z = Math.cos(time * 0.1) * 0.15 + Math.sin(scroll * Math.PI * 3) * 0.4;
+
+    const scalePulse = 1.0 + Math.sin(time * 0.5) * 0.05;
+    logoWrapper.scale.setScalar(logoScale * scalePulse);
+    logoWrapper.scale.y = -logoScale * scalePulse;
+
+    logoMat.iridescenceThicknessRange = [100 + scroll * 200, 400 - scroll * 150];
+
+    // ── GHOST TRAILS ──
+    for (let i = 0; i < ghostCount; i++) {
+        const delay = (i + 1) * 0.12;
+        const pt = time - delay;
+        const ps = Math.max(0, scroll - delay * 0.02);
+        const psr = ps * Math.PI * 4;
+        ghostLogos[i].rotation.y = pt * 0.2 + psr;
+        ghostLogos[i].rotation.x = Math.sin(pt * 0.15) * 0.3 + ps * 1.2;
+        ghostLogos[i].rotation.z = Math.cos(pt * 0.1) * 0.15 + Math.sin(ps * Math.PI * 3) * 0.4;
+        const gs = logoScale * scalePulse * (1 + (i + 1) * 0.03);
+        ghostLogos[i].scale.setScalar(gs);
+        ghostLogos[i].scale.y = -gs;
+    }
+
+    // ── ORBIT ITEMS ──
+    for (const oi of orbitItems) {
+        const a = time * oi.speed + oi.offset + scroll * Math.PI;
+        oi.mesh.position.set(
+            Math.cos(a) * oi.radius,
+            Math.sin(a) * oi.radius * 0.6 + oi.yOffset + Math.sin(time * 0.3 + oi.offset) * 0.5,
+            Math.sin(a * 0.7 + oi.tilt) * oi.radius * 0.3
+        );
+        oi.mesh.rotation.y = time * oi.spinSpeed;
+        oi.mesh.rotation.x = time * oi.spinSpeed * 0.6;
+    }
+
+    ringGroup.rotation.y = time * 0.06 + scroll * 0.5;
+    ring1.rotation.z = time * 0.1;
+    ring2.rotation.z = -time * 0.07;
+
+    const pArr = pGeo.attributes.position.array;
+    for (let i = 0; i < particleCount; i++) {
+        const idx = i * 3, bp = pBasePos[i];
+        pArr[idx] = bp.x + Math.sin(time * 0.2 + i * 0.5) * 0.5;
+        pArr[idx+1] = bp.y + Math.cos(time * 0.15 + i * 0.3) * 0.4;
+        pArr[idx+2] = bp.z + Math.sin(time * 0.1 + i * 0.2) * 0.3;
+    }
+    pGeo.attributes.position.needsUpdate = true;
+
+    fillLight.intensity = 1.5 + Math.sin(time * 0.5) * 0.3;
+    backLight.intensity = 1.0 + Math.cos(time * 0.4) * 0.2;
+
+    const mx = (mouseX / innerWidth - 0.5) * 2;
+    const my = (mouseY / innerHeight - 0.5) * -2;
+    const camAngle = scroll * Math.PI * 3;
+    const camRadius = 18 + Math.sin(scroll * Math.PI * 2.5) * 4 - scroll * 3;
+    const camHeight = Math.sin(scroll * Math.PI * 2) * 3.5 + Math.cos(scroll * Math.PI * 3.4) * 2;
+    camera.position.x = Math.sin(camAngle) * camRadius + mx * 1.2;
+    camera.position.y = camHeight + my * 0.8;
+    camera.position.z = Math.cos(camAngle) * camRadius;
+    camera.lookAt(0, 0, 0);
+
+    composer.render();
+}
+animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+    composer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
